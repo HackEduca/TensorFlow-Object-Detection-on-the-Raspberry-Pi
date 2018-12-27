@@ -2,6 +2,7 @@ import sys, os
 import cv2
 import numpy as np
 import tensorflow as tf
+import zmq
 
 
 IM_WIDTH = 640  # Use smaller resolution for
@@ -76,6 +77,14 @@ frame_rate_calc = 1
 freq = cv2.getTickFrequency()
 font = cv2.FONT_HERSHEY_SIMPLEX
 
+
+# zmq socket 
+port = 38779
+context = zmq.Context()
+socket = context.socket(zmq.REQ)
+socket.connect ("tcp://localhost:%s" % port)
+
+
 ### USB webcam ###
 if camera_type == 'usb':
     # Initialize USB webcam feed
@@ -101,7 +110,9 @@ if camera_type == 'usb':
                 feed_dict={image_tensor: frame_expanded})
             # https://lijiancheng0614.github.io/2017/08/22/2017_08_22_TensorFlow-Object-Detection-API/
             category_name = category_index[np.squeeze(classes).astype(np.int32)[0]]['name']
-            print("classes", category_name) # 没有东西的时候怎么办
+            # print("classes", category_name) # 没有东西的时候怎么办
+            socket.send_json({"class":str(category_name)}) # 设置超时
+            _ = socket.recv_json()
             # publish
             t2 = cv2.getTickCount()
             time1 = (t2 - t1) / freq
@@ -114,4 +125,3 @@ if camera_type == 'usb':
     camera.release()
 
 cv2.destroyAllWindows()
-
