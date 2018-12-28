@@ -4,6 +4,9 @@ import numpy as np
 import tensorflow as tf
 import zmq
 
+# 加入环境变量
+sys.path.append("/home/pi/tensorflow1/models/research")
+sys.path.append("/home/pi/tensorflow1/models/research/slim")
 
 IM_WIDTH = 640  # Use smaller resolution for
 IM_HEIGHT = 480  # slightly faster framerate
